@@ -9,16 +9,19 @@ sidebar — there is no backend and no sign-in form.
 Published from the [`realbenpeters/invoicereports`](https://github.com/realbenpeters/invoicereports)
 repository to **<https://realbenpeters.github.io/invoicereports/>**.
 
-The site is plain static files. If GitHub Pages is not serving it yet, open the repository's
-**Settings → Pages** and set **Source** to **Deploy from a branch**, branch **main**, folder
-**/(root)**. The URL starts working after GitHub's first build (usually under a minute).
+GitHub Pages is enabled from the **`gh-pages`** branch, which holds the static files plus a
+`.nojekyll` marker. `main` remains the source of truth; to publish a change, copy it to
+`gh-pages` and push. Alternatively, switch **Settings → Pages** to deploy from
+**main / (root)** and retire `gh-pages`.
 
-> **CORS requirement:** Tracewell's API only returns CORS headers for allowlisted origins.
-> A request from `https://realbenpeters.github.io` is currently rejected, and unauthenticated
-> requests from the documented localhost origins are rejected too. The page will show
-> “Couldn’t load invoices” until the Tracewell platform team adds the serving origin
-> (`https://realbenpeters.github.io`) to the API's CORS allowlist. Do not work around this
-> with a proxy that forwards Keycards.
+> **CORS blocker (verified):** Tracewell's API only returns CORS headers for allowlisted
+> origins. On 9 Nov 2026 the deployed page's preflight from
+> `https://realbenpeters.github.io` returned HTTP 500 without an
+> `Access-Control-Allow-Origin` header, so the page shows “Couldn’t load invoices.” The
+> Tracewell platform team must add `https://realbenpeters.github.io` to the API's CORS
+> allowlist before the hosted module can read invoices. Unauthenticated probes from the
+> documented localhost origins were also rejected, so verify that path as well. Do not work
+> around this with a proxy that forwards Keycards.
 
 ## What it shows
 
