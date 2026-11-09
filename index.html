@@ -1,0 +1,1148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice Register</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d6b56'/%3E%3Cpath d='M10 7h12v18l-3-2-3 2-3-2-3 2V7z' fill='%23fff'/%3E%3Cpath d='M13 12h6M13 16h6M13 20h3' stroke='%231d6b56' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --ink: #16211d;
+    --ink-soft: #33443b;
+    --muted: #6b7a72;
+    --line: #dbe2dd;
+    --line-soft: #edf1ee;
+    --paper: #f3f3ee;
+    --card: #ffffff;
+    --accent: #1d6b56;
+    --accent-dark: #175948;
+    --accent-soft: #e9f2ee;
+    --danger: #a33a2b;
+    --radius: 12px;
+    --shadow: 0 1px 2px rgba(21, 33, 29, .05), 0 8px 24px -18px rgba(21, 33, 29, .35);
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid #2c7f66; outline-offset: 2px; }
+
+  .top-rule { height: 4px; background: linear-gradient(90deg, var(--accent), #7fb49e 65%, #c9dcd2); }
+
+  .page { max-width: 1120px; margin: 0 auto; padding: 30px 24px 64px; }
+
+  .app-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    margin: 5px 0 0;
+    font-size: 30px;
+    line-height: 1.15;
+    font-weight: 680;
+    letter-spacing: -.022em;
+  }
+  .header-actions { display: flex; align-items: center; gap: 8px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: 620;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .btn svg { flex: none; }
+  .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 1px 1px rgba(21,33,29,.12); }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-primary:disabled { background: #a9b8b0; cursor: default; box-shadow: none; }
+  .btn-ghost { background: var(--card); border-color: var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: #f8faf8; border-color: #c6d0c9; }
+  .btn-link {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--accent);
+    font-size: 12.5px;
+    font-weight: 650;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  /* ---------- Filters ---------- */
+  .filters { padding: 14px 16px 16px; margin-bottom: 12px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 13px; }
+  .preset {
+    border: 1px solid transparent;
+    background: #f1f4f0;
+    color: #46584f;
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-size: 12px;
+    font-weight: 620;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .preset:hover { background: #e8ede8; }
+  .preset.is-active { background: var(--accent-soft); border-color: #c4dcd2; color: #12513f; }
+
+  .fields { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 5px; flex: 0 1 152px; min-width: 0; }
+  .field.grow { flex: 1 1 210px; }
+  .field > label {
+    font-size: 10.5px;
+    font-weight: 650;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field input, .field select {
+    width: 100%;
+    height: 36px;
+    padding: 7px 10px;
+    border: 1px solid #d2dad5;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 13px;
+    color: var(--ink);
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input:hover, .field select:hover { border-color: #bcc8c0; }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: #4b9480;
+    box-shadow: 0 0 0 3px rgba(45, 127, 102, .14);
+  }
+  .field select { text-overflow: ellipsis; }
+  .field-actions { flex: 0 0 auto; }
+  .field-actions .btn { height: 36px; padding: 0 12px; font-weight: 600; }
+
+  /* ---------- Status + progress ---------- */
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 20px;
+    margin: 0 4px 10px;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  #status { display: inline-flex; align-items: center; gap: 7px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: #6aa58d; flex: none; }
+  .dot.is-busy { animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+  .status-error { color: var(--danger); }
+  #status-right { text-align: right; }
+  .progress {
+    position: relative;
+    height: 3px;
+    margin: 0 0 10px;
+    border-radius: 99px;
+    background: #e4eae5;
+    overflow: hidden;
+    display: none;
+  }
+  .progress.is-visible { display: block; }
+  .progress > span {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2c7f66, #8cc7ae);
+    transition: width .2s ease;
+  }
+
+  /* ---------- Table ---------- */
+  .table-card { overflow: hidden; }
+  .table-wrap { overflow: auto; max-height: 66vh; }
+  table { width: 100%; min-width: 700px; border-collapse: separate; border-spacing: 0; }
+  caption { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #fafbf8;
+    border-bottom: 1px solid var(--line);
+    padding: 11px 16px;
+    font-size: 10.5px;
+    font-weight: 680;
+    letter-spacing: .075em;
+    text-transform: uppercase;
+    color: #62736a;
+    text-align: left;
+    white-space: nowrap;
+  }
+  thead th.num { text-align: right; }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: #fbfcfa; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cell-date { color: var(--ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cell-invoice { font-weight: 660; letter-spacing: .01em; white-space: nowrap; }
+  .cell-customer { color: var(--ink-soft); max-width: 300px; }
+  .cell-total { font-weight: 680; }
+  .cell-muted { color: #98a59d; }
+  .tax-pending { color: #9aa79f; letter-spacing: .08em; }
+  .row-error .cell-muted { cursor: help; }
+  .badge-error {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: #fbeeea;
+    color: var(--danger);
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: .02em;
+    vertical-align: 1px;
+  }
+
+  tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: #f6f9f6;
+    border-top: 2px solid #cfdad3;
+    padding: 13px 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  tfoot td.num { white-space: nowrap; }
+  .totals-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #4d5f56;
+  }
+  .totals-label span { font-weight: 500; letter-spacing: .01em; text-transform: none; color: var(--muted); margin-left: 6px; }
+  .totals-note { display: block; margin-top: 2px; font-size: 10.5px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--danger); }
+
+  .empty-row td, .loading-row td {
+    padding: 52px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+  .loading-row td { color: #7b8a82; }
+
+  /* ---------- Gate / error ---------- */
+  .gate { display: flex; justify-content: center; padding: 40px 0 20px; }
+  .gate-card {
+    max-width: 430px;
+    width: 100%;
+    padding: 30px 28px;
+    text-align: center;
+  }
+  .gate-mark {
+    width: 46px;
+    height: 46px;
+    margin: 0 auto 14px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .gate-card h2 { margin: 0 0 8px; font-size: 19px; letter-spacing: -.01em; }
+  .gate-card p { margin: 0 0 20px; color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+  .error-panel { padding: 22px 24px; border-left: 3px solid var(--danger); }
+  .error-panel h2 { margin: 0 0 6px; font-size: 16px; }
+  .error-panel p { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+
+  .print-head { display: none; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 760px) {
+    .page { padding: 22px 14px 48px; }
+    .app-header { align-items: center; }
+    h1 { font-size: 24px; }
+    .header-actions .btn span { display: none; }
+    .header-actions .btn { padding: 9px 11px; }
+    .fields { gap: 9px; }
+    .field, .field.grow { flex: 1 1 100%; }
+    .field-actions { flex: 1 1 100%; }
+    .field-actions .btn { width: 100%; }
+    .status-row { align-items: flex-start; flex-direction: column; gap: 2px; }
+    #status-right { text-align: left; }
+    .table-wrap { max-height: none; }
+    td, th { padding-left: 12px !important; padding-right: 12px !important; }
+  }
+
+  /* ---------- Print ---------- */
+  @media print {
+    @page { size: A4 portrait; margin: 13mm 11mm 14mm; }
+    html, body { background: #fff !important; }
+    body { font-size: 10.5pt; }
+    .top-rule, .app-header, .filters, .status-row, .progress, .gate, .error-panel, .no-print { display: none !important; }
+    .page { max-width: none; padding: 0; margin: 0; }
+    .print-head { display: block; margin-bottom: 14px; }
+    .print-business {
+      font-size: 9pt;
+      font-weight: 650;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #444;
+    }
+    .print-head h1 { font-size: 20pt; margin: 2px 0 4px; color: #000; }
+    .print-meta { font-size: 8.5pt; color: #444; line-height: 1.5; }
+    .print-meta strong { color: #000; }
+    .table-card { border: 0; box-shadow: none; border-radius: 0; overflow: visible; }
+    .table-wrap { overflow: visible; max-height: none; }
+    table { min-width: 0; width: 100%; font-size: 9pt; }
+    thead { display: table-header-group; }
+    thead th {
+      position: static;
+      background: #fff !important;
+      color: #000;
+      border-bottom: 1.2px solid #333;
+      padding: 6px 6px;
+      font-size: 7.5pt;
+      letter-spacing: .04em;
+    }
+    tbody td { padding: 5.5px 6px; border-bottom: .5px solid #ccc; }
+    tbody tr { break-inside: avoid; }
+    tbody tr:hover td { background: transparent !important; }
+    tfoot { display: table-row-group; }
+    tfoot td {
+      position: static;
+      background: #f2f2f2 !important;
+      border-top: 1.2px solid #333;
+      border-bottom: 1.2px solid #333;
+      padding: 7px 6px;
+      color: #000;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .totals-label { font-size: 7.5pt; }
+    .totals-note { color: #000; }
+    .badge-error { border: .5pt solid #000; background: none !important; color: #000 !important; }
+    .cell-muted, .tax-pending { color: #555 !important; }
+    .cell-date, .cell-customer { color: #000; }
+  }
+</style>
+</head>
+<body>
+<div class="top-rule"></div>
+
+<main class="page">
+  <header class="app-header">
+    <div>
+      <div class="eyebrow" id="biz-label">Tracewell</div>
+      <h1>Invoice Register</h1>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-primary" id="print-btn" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/>
+        </svg>
+        <span>Print</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Session gate -->
+  <section class="gate" id="gate" hidden>
+    <div class="panel gate-card">
+      <div class="gate-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2V3z"/><path d="M9 8h6M9 12h6M9 16h3"/>
+        </svg>
+      </div>
+      <h2>Open this module from Tracewell</h2>
+      <p>This register uses your Tracewell session. Sign in to Tracewell, open <strong>Modules</strong>, and choose <strong>Invoice Register</strong>.</p>
+      <a class="btn btn-primary" href="https://trace-matrix.web.app" target="_blank" rel="noopener">Open Tracewell</a>
+    </div>
+  </section>
+
+  <!-- Fatal error -->
+  <section class="panel error-panel" id="error-panel" hidden>
+    <h2>Couldn’t load invoices</h2>
+    <p id="error-message"></p>
+    <button type="button" class="btn btn-ghost" id="retry-btn">Try again</button>
+  </section>
+
+  <!-- Register -->
+  <section id="app" hidden>
+    <div class="panel filters no-print">
+      <div class="presets" role="group" aria-label="Quick date ranges">
+        <button type="button" class="preset is-active" data-preset="all">All time</button>
+        <button type="button" class="preset" data-preset="thisMonth">This month</button>
+        <button type="button" class="preset" data-preset="lastMonth">Last month</button>
+        <button type="button" class="preset" data-preset="last30">Last 30 days</button>
+        <button type="button" class="preset" data-preset="thisYear">This year</button>
+      </div>
+      <div class="fields">
+        <div class="field">
+          <label for="from">From</label>
+          <input type="date" id="from" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="to">To</label>
+          <input type="date" id="to" autocomplete="off">
+        </div>
+        <div class="field grow">
+          <label for="customer">Customer</label>
+          <select id="customer">
+            <option value="">All customers</option>
+          </select>
+        </div>
+        <div class="field grow">
+          <label for="search">Search</label>
+          <input type="search" id="search" placeholder="Invoice #, customer, PO…" autocomplete="off">
+        </div>
+        <div class="field field-actions">
+          <button type="button" class="btn btn-ghost" id="clear-btn" aria-label="Clear filters">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress no-print" id="progress" role="progressbar" aria-label="Loading invoice details" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <span id="progress-bar"></span>
+    </div>
+
+    <div class="status-row no-print">
+      <span id="status" aria-live="polite"><span class="dot" id="status-dot"></span><span id="status-text">Loading invoices…</span></span>
+      <span id="status-right"></span>
+    </div>
+
+    <div class="panel table-card">
+      <div class="print-head" id="print-head">
+        <div class="print-business" id="print-business">Tracewell</div>
+        <h1>Invoice Register</h1>
+        <div class="print-meta">
+          <div><strong id="print-scope">All invoices</strong></div>
+          <div>Printed <span id="print-time"></span></div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="invoice-table">
+          <caption>Invoice register with amount before tax, tax, and total</caption>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Invoice #</th>
+              <th scope="col">Customer</th>
+              <th scope="col" class="num">Amount (no tax)</th>
+              <th scope="col" class="num">Tax</th>
+              <th scope="col" class="num">Total</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr class="loading-row"><td colspan="6">Loading invoices…</td></tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="totals-label">Totals <span id="totals-count"></span></td>
+              <td class="num" id="total-net">—</td>
+              <td class="num" id="total-tax">—</td>
+              <td class="num" id="total-gross">—</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<noscript>
+  <p style="max-width:1120px;margin:24px auto;padding:0 24px;">This module needs JavaScript enabled to load your invoices.</p>
+</noscript>
+
+<script>
+(() => {
+  'use strict';
+
+  const API_BASE = 'https://trace-matrix-api-315133380910.us-east1.run.app';
+  const TOKEN_KEY = 'module_keycard';
+  const MAX_CONCURRENCY = 7;
+
+  /* ---------- Keycard handoff ---------- */
+  (function pickUpKeycard() {
+    const hash = location.hash.slice(1);
+    if (!hash) return;
+    const key = new URLSearchParams(hash).get('k');
+    if (key) {
+      try { localStorage.setItem(TOKEN_KEY, key); } catch (_) { /* storage unavailable */ }
+      history.replaceState({}, '', location.pathname + location.search);
+    }
+  })();
+
+  const getToken = () => {
+    try { return localStorage.getItem(TOKEN_KEY); } catch (_) { return null; }
+  };
+  const authHeaders = () => {
+    const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  class AuthError extends Error {}
+  class ApiError extends Error {
+    constructor(message, status) {
+      super(message);
+      this.name = 'ApiError';
+      this.status = status;
+    }
+  }
+
+  async function api(path) {
+    let res;
+    try {
+      res = await fetch(API_BASE + path, {
+        headers: { Accept: 'application/json', ...authHeaders() },
+      });
+    } catch (_) {
+      throw new ApiError('Could not reach Tracewell. Check your connection and try again.', 0);
+    }
+    if (res.status === 401) throw new AuthError('Your Tracewell session has expired.');
+    if (!res.ok) {
+      let message = `Request failed (${res.status}).`;
+      try {
+        const body = await res.json();
+        if (body && typeof body.error === 'string' && body.error) message = body.error;
+      } catch (_) { /* keep generic message */ }
+      throw new ApiError(message, res.status);
+    }
+    return res.json();
+  }
+
+  /* ---------- DOM ---------- */
+  const $ = (id) => document.getElementById(id);
+  const els = {
+    gate: $('gate'),
+    app: $('app'),
+    errorPanel: $('error-panel'),
+    errorMessage: $('error-message'),
+    retryBtn: $('retry-btn'),
+    bizLabel: $('biz-label'),
+    printBusiness: $('print-business'),
+    printScope: $('print-scope'),
+    printTime: $('print-time'),
+    rows: $('rows'),
+    from: $('from'),
+    to: $('to'),
+    customer: $('customer'),
+    search: $('search'),
+    clearBtn: $('clear-btn'),
+    printBtn: $('print-btn'),
+    statusText: $('status-text'),
+    statusDot: $('status-dot'),
+    statusRight: $('status-right'),
+    progress: $('progress'),
+    progressBar: $('progress-bar'),
+    totalsCount: $('totals-count'),
+    totalNet: $('total-net'),
+    totalTax: $('total-tax'),
+    totalGross: $('total-gross'),
+  };
+
+  /* ---------- State ---------- */
+  const state = {
+    invoices: [],
+    currency: 'CAD',
+    dateFormat: 'MM/DD/YYYY',
+    business: '',
+    loaded: false,
+    details: { running: false, done: 0, total: 0, failed: 0 },
+    filters: { from: '', to: '', customer: '', q: '' },
+    preset: 'all',
+  };
+
+  let moneyFormatter = makeMoneyFormatter('CAD');
+
+  function makeMoneyFormatter(currency) {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency,
+        currencyDisplay: 'narrowSymbol',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    } catch (_) {
+      return new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+  }
+
+  const toCents = (value) => Math.round(Number(value || 0) * 100);
+  const fmtCents = (cents) => moneyFormatter.format(cents / 100);
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const isoDate = (date) => `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const parts = String(iso).slice(0, 10).split('-');
+    if (parts.length !== 3) return iso;
+    const [y, m, d] = parts;
+    if (state.dateFormat === 'YYYY-MM-DD') return `${y}-${m}-${d}`;
+    if (state.dateFormat === 'DD/MM/YYYY') return `${d}/${m}/${y}`;
+    if (state.dateFormat === 'YYYY/MM/DD') return `${y}/${m}/${d}`;
+    return `${m}/${d}/${y}`;
+  }
+
+  function setStatus(text, { busy = false, error = false } = {}) {
+    els.statusText.textContent = text;
+    els.statusDot.classList.toggle('is-busy', busy);
+    els.statusText.classList.toggle('status-error', error);
+  }
+
+  function showOnly(section) {
+    els.gate.hidden = section !== 'gate';
+    els.errorPanel.hidden = section !== 'error';
+    els.app.hidden = section !== 'app';
+  }
+
+  function showGate() {
+    showOnly('gate');
+    els.printBtn.disabled = true;
+  }
+
+  function showError(err) {
+    showOnly('error');
+    els.printBtn.disabled = true;
+    els.errorMessage.textContent = err && err.status === 403
+      ? 'Your Tracewell role does not have access to invoices.'
+      : (err && err.message) || 'Something went wrong while loading the register.';
+  }
+
+  /* ---------- Settings ---------- */
+  async function loadSettings() {
+    for (const path of ['/api/settings/site', '/api/settings']) {
+      try {
+        const res = await fetch(API_BASE + path, {
+          headers: { Accept: 'application/json', ...authHeaders() },
+        });
+        if (res.status === 401) throw new AuthError('Your Tracewell session has expired.');
+        if (!res.ok) continue;
+        const body = await res.json();
+        const settings = body && (body.settings || body);
+        if (!settings || typeof settings !== 'object') continue;
+
+        if (typeof settings.currency === 'string' && /^[A-Za-z]{3}$/.test(settings.currency)) {
+          state.currency = settings.currency.toUpperCase();
+          moneyFormatter = makeMoneyFormatter(state.currency);
+        }
+        if (typeof settings.date_format === 'string' && settings.date_format) {
+          state.dateFormat = settings.date_format;
+        }
+        const identity = settings.business_identity || {};
+        state.business = String(
+          identity.companyName || identity.company_name || settings.business_name || ''
+        ).trim();
+        return;
+      } catch (err) {
+        if (err instanceof AuthError) throw err;
+        // Settings are cosmetic; try the next shape.
+      }
+    }
+  }
+
+  function applyBusinessName() {
+    if (!state.business) return;
+    els.bizLabel.textContent = state.business;
+    els.printBusiness.textContent = state.business;
+    document.title = `Invoice Register · ${state.business}`;
+  }
+
+  /* ---------- Data ---------- */
+  function sortInvoices(a, b) {
+    if (a.date !== b.date) return b.date.localeCompare(a.date);
+    return b.number.localeCompare(a.number, undefined, { numeric: true });
+  }
+
+  function buildInvoices(orders) {
+    state.invoices = orders
+      .filter((order) => order && order.status === 'posted' && order.invoice_number && !order.voided_at)
+      .map((order) => ({
+        id: order.order_id,
+        number: String(order.invoice_number),
+        date: String(order.order_date || '').slice(0, 10),
+        customerId: order.partner_id || '',
+        customer: String(order.customer_name || 'Unknown customer').trim() || 'Unknown customer',
+        po: String(order.customer_po || ''),
+        totalCents: toCents(order.order_total),
+        netCents: null,
+        taxCents: null,
+        detailState: 'pending',
+      }))
+      .sort(sortInvoices);
+  }
+
+  function populateCustomers() {
+    const seen = new Map();
+    for (const invoice of state.invoices) {
+      if (!seen.has(invoice.customerId)) seen.set(invoice.customerId, invoice.customer);
+    }
+    const names = [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1], undefined, { sensitivity: 'base' }));
+    const current = els.customer.value;
+    const frag = document.createDocumentFragment();
+    const all = document.createElement('option');
+    all.value = '';
+    all.textContent = 'All customers';
+    frag.appendChild(all);
+    for (const [id, name] of names) {
+      if (!id) continue;
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = name;
+      frag.appendChild(option);
+    }
+    els.customer.replaceChildren(frag);
+    if (current && seen.has(current)) els.customer.value = current;
+    else state.filters.customer = '';
+  }
+
+  async function loadDetail(invoice) {
+    const body = await api(`/api/operations/orders/${encodeURIComponent(invoice.id)}`);
+    const items = Array.isArray(body.items)
+      ? body.items
+      : Array.isArray(body.order_items)
+        ? body.order_items
+        : Array.isArray(body)
+          ? body
+          : [];
+    const tax = items.reduce((sum, item) => sum + Number(item.taxAmount || 0), 0);
+    const taxCents = Math.round(tax * 100);
+    invoice.taxCents = taxCents;
+    invoice.netCents = invoice.totalCents - taxCents;
+    invoice.detailState = 'done';
+  }
+
+  async function loadAllDetails() {
+    for (const invoice of state.invoices) {
+      if (invoice.detailState === 'error') {
+        invoice.detailState = 'pending';
+        invoice.taxCents = null;
+        invoice.netCents = null;
+      }
+    }
+    const pending = state.invoices.filter((invoice) => invoice.detailState !== 'done');
+
+    state.details.running = pending.length > 0;
+    state.details.done = 0;
+    state.details.total = pending.length;
+    state.details.failed = 0;
+    renderProgress();
+
+    if (!pending.length) {
+      render();
+      return;
+    }
+
+    let cursor = 0;
+    let authFailure = null;
+
+    const worker = async () => {
+      while (cursor < pending.length) {
+        if (authFailure) return;
+        const invoice = pending[cursor++];
+        try {
+          await loadDetail(invoice);
+        } catch (err) {
+          if (err instanceof AuthError) {
+            authFailure = err;
+            return;
+          }
+          invoice.detailState = 'error';
+          invoice.taxCents = null;
+          invoice.netCents = null;
+          state.details.failed += 1;
+        }
+        state.details.done += 1;
+        renderProgress();
+        scheduleRender();
+      }
+    };
+
+    await Promise.all(Array.from({ length: Math.min(MAX_CONCURRENCY, pending.length) }, worker));
+
+    state.details.running = false;
+    renderProgress();
+    if (authFailure) throw authFailure;
+    render();
+  }
+
+  /* ---------- Rendering ---------- */
+  let renderQueued = false;
+  function scheduleRender() {
+    if (renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(() => {
+      renderQueued = false;
+      render();
+    });
+  }
+
+  function renderProgress() {
+    const { running, done, total } = state.details;
+    els.progress.classList.toggle('is-visible', running);
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    els.progressBar.style.width = `${pct}%`;
+    els.progress.setAttribute('aria-valuenow', String(pct));
+    if (running) {
+      els.statusDot.classList.add('is-busy');
+      const failedNote = state.details.failed ? ` · ${state.details.failed} unavailable` : '';
+      setStatus(`Loading tax details… ${done} of ${total}${failedNote}`, { busy: true });
+    }
+    updatePrintMeta();
+  }
+
+  function activeFilters() {
+    return { ...state.filters, customerName: customerName(state.filters.customer) };
+  }
+
+  function customerName(id) {
+    if (!id) return '';
+    const match = state.invoices.find((invoice) => invoice.customerId === id);
+    return match ? match.customer : '';
+  }
+
+  function filteredInvoices() {
+    const { from, to, customer, q } = state.filters;
+    const needle = q.trim().toLowerCase();
+    return state.invoices.filter((invoice) => {
+      if (from && invoice.date < from) return false;
+      if (to && invoice.date > to) return false;
+      if (customer && invoice.customerId !== customer) return false;
+      if (needle) {
+        const haystack = `${invoice.number} ${invoice.customer} ${invoice.po}`.toLowerCase();
+        if (!haystack.includes(needle)) return false;
+      }
+      return true;
+    });
+  }
+
+  function makeCell(className = '') {
+    const td = document.createElement('td');
+    if (className) td.className = className;
+    return td;
+  }
+
+  function makeRow(invoice) {
+    const tr = document.createElement('tr');
+
+    const date = makeCell('cell-date');
+    date.textContent = fmtDate(invoice.date);
+    tr.appendChild(date);
+
+    const number = makeCell('cell-invoice');
+    number.textContent = invoice.number;
+    tr.appendChild(number);
+
+    const customer = makeCell('cell-customer');
+    customer.textContent = invoice.customer;
+    if (invoice.po) customer.title = `PO ${invoice.po}`;
+    tr.appendChild(customer);
+
+    const net = makeCell('num');
+    const tax = makeCell('num');
+    const total = makeCell('num cell-total');
+
+    if (invoice.detailState === 'error') {
+      tr.classList.add('row-error');
+      net.innerHTML = '<span class="cell-muted" title="Invoice details could not be loaded">—</span>';
+      tax.innerHTML = '<span class="cell-muted" title="Invoice details could not be loaded">—</span><span class="badge-error">unavailable</span>';
+    } else if (invoice.netCents === null || invoice.taxCents === null) {
+      net.innerHTML = '<span class="tax-pending" aria-label="Loading">···</span>';
+      tax.innerHTML = '<span class="tax-pending" aria-label="Loading">···</span>';
+    } else {
+      net.textContent = fmtCents(invoice.netCents);
+      tax.textContent = fmtCents(invoice.taxCents);
+    }
+
+    total.textContent = fmtCents(invoice.totalCents);
+
+    tr.appendChild(net);
+    tr.appendChild(tax);
+    tr.appendChild(total);
+    return tr;
+  }
+
+  function renderTotals(list) {
+    let net = 0;
+    let tax = 0;
+    let gross = 0;
+    let known = 0;
+    let unavailable = 0;
+
+    for (const invoice of list) {
+      gross += invoice.totalCents;
+      if (invoice.netCents === null || invoice.taxCents === null) {
+        if (invoice.detailState === 'error') unavailable += 1;
+      } else {
+        net += invoice.netCents;
+        tax += invoice.taxCents;
+        known += 1;
+      }
+    }
+
+    const loading = state.details.running || list.some((invoice) => invoice.detailState === 'pending');
+    els.totalGross.textContent = fmtCents(gross);
+    els.totalsCount.textContent = `${list.length} invoice${list.length === 1 ? '' : 's'}`;
+
+    if (loading) {
+      const pending = list.filter((invoice) => invoice.detailState === 'pending').length;
+      els.totalNet.innerHTML = '<span class="tax-pending">···</span>';
+      els.totalTax.innerHTML = '<span class="tax-pending">···</span>';
+      els.totalsCount.textContent = `${list.length} invoice${list.length === 1 ? '' : 's'} · loading ${pending}`;
+      return;
+    }
+
+    els.totalNet.textContent = fmtCents(net);
+    els.totalTax.textContent = fmtCents(tax);
+
+    if (unavailable > 0) {
+      const note = document.createElement('span');
+      note.className = 'totals-note';
+      note.textContent = `Excludes ${unavailable} invoice${unavailable === 1 ? '' : 's'} with unavailable tax details`;
+      els.totalsCount.appendChild(note);
+    } else if (known !== list.length) {
+      // Defensive: should not happen once loading is complete.
+      const note = document.createElement('span');
+      note.className = 'totals-note';
+      note.textContent = `${list.length - known} invoice${list.length - known === 1 ? '' : 's'} without tax details`;
+      els.totalsCount.appendChild(note);
+    }
+  }
+
+  function renderFooterStatus(list) {
+    const base = `${list.length} invoice${list.length === 1 ? '' : 's'}`;
+    if (!state.loaded) {
+      setStatus('Loading invoices…', { busy: true });
+      els.statusRight.textContent = '';
+      return;
+    }
+    if (state.details.running) {
+      renderProgress();
+      return;
+    }
+    const listFailed = list.filter((invoice) => invoice.detailState === 'error').length;
+    if (listFailed > 0) {
+      setStatus(`${base} · ${listFailed} with unavailable tax details`, { error: true });
+      const retry = document.createElement('button');
+      retry.type = 'button';
+      retry.className = 'btn-link';
+      retry.textContent = 'Retry';
+      retry.addEventListener('click', () => {
+        retry.disabled = true;
+        loadAllDetails().catch(handleFatal);
+      });
+      els.statusRight.replaceChildren(retry);
+      return;
+    }
+    setStatus(base);
+    els.statusRight.textContent = scopeLabel();
+  }
+
+  function render() {
+    if (!state.loaded) return;
+    const list = filteredInvoices();
+
+    if (!list.length) {
+      const tr = document.createElement('tr');
+      tr.className = 'empty-row';
+      const td = document.createElement('td');
+      td.colSpan = 6;
+      td.textContent = state.invoices.length
+        ? 'No invoices match these filters. Try widening the date range or clearing the search.'
+        : 'No posted invoices found.';
+      tr.appendChild(td);
+      els.rows.replaceChildren(tr);
+    } else {
+      const frag = document.createDocumentFragment();
+      for (const invoice of list) frag.appendChild(makeRow(invoice));
+      els.rows.replaceChildren(frag);
+    }
+
+    renderTotals(list);
+    renderFooterStatus(list);
+    updatePrintMeta();
+    els.printBtn.disabled = list.length === 0;
+  }
+
+  function scopeLabel() {
+    const { from, to, customer, q } = state.filters;
+    const parts = [];
+    if (from && to) parts.push(`${fmtDate(from)} – ${fmtDate(to)}`);
+    else if (from) parts.push(`From ${fmtDate(from)}`);
+    else if (to) parts.push(`Through ${fmtDate(to)}`);
+    else parts.push('All dates');
+    if (customer) parts.push(customerName(customer));
+    if (q.trim()) parts.push(`Search “${q.trim()}”`);
+    return parts.join(' · ');
+  }
+
+  function updatePrintMeta() {
+    if (!state.loaded) return;
+    const count = filteredInvoices().length;
+    els.printScope.textContent = `${count} invoice${count === 1 ? '' : 's'} · ${scopeLabel()}`;
+    els.printTime.textContent = new Date().toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  }
+
+  /* ---------- Loading ---------- */
+  async function boot() {
+    if (!getToken()) {
+      showGate();
+      return;
+    }
+
+    showOnly('app');
+    state.loaded = false;
+    state.details = { running: false, done: 0, total: 0, failed: 0 };
+    els.rows.innerHTML = '<tr class="loading-row"><td colspan="6">Loading invoices…</td></tr>';
+    els.totalNet.textContent = '—';
+    els.totalTax.textContent = '—';
+    els.totalGross.textContent = '—';
+    els.totalsCount.textContent = '';
+    els.statusRight.textContent = '';
+    els.printBtn.disabled = true;
+    setStatus('Loading invoices…', { busy: true });
+    els.progress.classList.remove('is-visible');
+
+    try {
+      // Settings only affect labels and number formatting; a failure here is cosmetic.
+      const settingsPromise = loadSettings().catch(() => {});
+      const body = await api('/api/operations/orders');
+      const orders = Array.isArray(body) ? body : Array.isArray(body.orders) ? body.orders : [];
+      await settingsPromise;
+
+      applyBusinessName();
+      buildInvoices(orders);
+      populateCustomers();
+      state.loaded = true;
+      render();
+      els.printBtn.disabled = state.invoices.length === 0;
+
+      if (state.invoices.length) await loadAllDetails();
+      if (state.loaded) render();
+    } catch (err) {
+      handleFatal(err);
+    }
+  }
+
+  function handleFatal(err) {
+    if (err instanceof AuthError) {
+      try { localStorage.removeItem(TOKEN_KEY); } catch (_) {}
+      showGate();
+      return;
+    }
+    showError(err);
+  }
+
+  /* ---------- Events ---------- */
+  function presetRange(name) {
+    const now = new Date();
+    if (name === 'thisMonth') {
+      return { from: isoDate(new Date(now.getFullYear(), now.getMonth(), 1)), to: isoDate(now) };
+    }
+    if (name === 'lastMonth') {
+      const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const last = new Date(now.getFullYear(), now.getMonth(), 0);
+      return { from: isoDate(first), to: isoDate(last) };
+    }
+    if (name === 'last30') {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 29);
+      return { from: isoDate(start), to: isoDate(now) };
+    }
+    if (name === 'thisYear') {
+      return { from: `${now.getFullYear()}-01-01`, to: isoDate(now) };
+    }
+    return { from: '', to: '' };
+  }
+
+  function setPreset(name) {
+    state.preset = name;
+    for (const button of document.querySelectorAll('.preset')) {
+      const active = button.dataset.preset === name;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    }
+  }
+
+  function applyFilters({ keepPreset = false } = {}) {
+    state.filters = {
+      from: els.from.value,
+      to: els.to.value,
+      customer: els.customer.value,
+      q: els.search.value,
+    };
+    if (!keepPreset) setPreset('');
+    render();
+  }
+
+  for (const button of document.querySelectorAll('.preset')) {
+    button.addEventListener('click', () => {
+      const range = presetRange(button.dataset.preset);
+      els.from.value = range.from;
+      els.to.value = range.to;
+      setPreset(button.dataset.preset);
+      applyFilters({ keepPreset: true });
+    });
+  }
+
+  els.from.addEventListener('change', () => applyFilters());
+  els.to.addEventListener('change', () => applyFilters());
+  els.customer.addEventListener('change', () => applyFilters());
+  els.search.addEventListener('input', () => applyFilters());
+  els.clearBtn.addEventListener('click', () => {
+    els.from.value = '';
+    els.to.value = '';
+    els.customer.value = '';
+    els.search.value = '';
+    setPreset('all');
+    applyFilters({ keepPreset: true });
+    els.search.focus();
+  });
+  els.retryBtn.addEventListener('click', () => boot());
+  els.printBtn.addEventListener('click', () => {
+    updatePrintMeta();
+    window.print();
+  });
+
+  setPreset('all');
+  boot();
+})();
+</script>
+</body>
+</html>

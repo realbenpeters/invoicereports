@@ -1,0 +1,9 @@
+{
+  "name": "invoice-register",
+  "version": "1.0.0",
+  "nav_label": "Invoice Register",
+  "icon": "🧾",
+  "description": "Printable register of all posted invoices with date, customer, amount before tax, tax, total and grand totals.",
+  "entry_url": "https://realbenpeters.github.io/invoicereports/",
+  "visible_to": ["tenant_admin", "staff", "viewer"]
+}
